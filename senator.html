@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+	<title>Look up Zipcode</title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+	
+	<body class="container">
+		<form class = "zipcodeForm" action="" method="POST">
+			<div class = "form-group">
+				<label for = "zipcode">Zipcode</label>
+				<input type="text" class="form-control" id="zipcodeInput">
+			</div>
+			<div class = "form-group">
+				<button type="submit" class="btn btn-default" id = "searchBtn" >Submit</button>
+			</div>
+			<div class= "form-group" id = "displayArea">
+				Display the results of the AJAX request over here.
+			</div>
+		</form>
+
+		<!--script type="text/javascript">
+
+			var loadup = function(){
+
+				console.log('Hello');
+
+			};
+
+			window.onload = loadup();
+
+		</script-->
+
+		<script src="js/libs/jquery.min.js"></script>
+		<!-- Latest compiled and minified JavaScript -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+	    <script src="js/senator.js"></script>
+	</body>
+</html>
