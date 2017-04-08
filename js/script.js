@@ -1,11 +1,15 @@
 
-function loadData() {
 
-    var $body = $('body');
-    var $wikiElem = $('#wikipedia-links');
-    var $nytHeaderElem = $('#nytimes-header');
-    var $nytElem = $('#nytimes-articles');
-    var $greeting = $('#greeting');
+// Globally Needed Variables
+var $body = $('body');
+var $wikiElem = $('#wikipedia-links');
+var $nytHeaderElem = $('#nytimes-header');
+var $nytElem = $('#nytimes-articles');
+var $greeting = $('#greeting');
+
+
+// The main function
+function loadData() {
 
     // clear out old data before new request
     $wikiElem.text("");
@@ -14,21 +18,24 @@ function loadData() {
     var streetStr = $("#street").val();
     var cityStr = $("#city").val();
     var locationStr = streetStr + ", " + cityStr;
-    // console.log(locationStr);
+    console.log(locationStr);
     var cityStrEncoded = encodeURI(cityStr);
 
     loadGoogleImages(locationStr);
     loadNYTimes(locationStr);
-    loadWikiArticles(cityStr);
-    loadWeatherDetails();
-    loadEventBriteDetails();
+    loadDetailsForZipcode();
+    // loadWikiArticles(cityStr);
+    // loadWeatherDetails();
+    // loadEventBriteDetails();
+    // fetchWeatherDetails();
+    // loadWeatherDetailsThroughJquery();
     return false;
 };
 
 
 // Code to Load the Google Street View Images
+// No AJAX calls involved
 var loadGoogleImages = function(locationStr){
-
     // URL
     var google_url = 'http://maps.googleapis.com/maps/api/streetview?size=600x300&location=' + locationStr + '';
     var str = '<img class="bgimg" ' + 'src="' + google_url + '"' + '>' + '';
@@ -37,6 +44,7 @@ var loadGoogleImages = function(locationStr){
 }
 
 // Code to Load the NYTimes Articles
+// Uses Jquery's ajax method
 var loadNYTimes = function(locationStr){
 
     // API Key needed to call the API methods
@@ -86,12 +94,13 @@ var loadWikiArticles = function(cityStrEncoded){
     // Accessing Wikipedia articles lead to CORS, so we handle the CORS requests using the HTTP headers and JSONP
     
     // 1. Using CORS Headers    
-    // $.ajax({
-    //     url : wiki_url,
-    //     success : function(result){
-    //         console.log(result);
-    //     }
-    // });
+    $.ajax({
+        url : wiki_url,
+        success : function(result){
+            console.log('Wikipedia Articles AJAX Call');
+            console.log(result);
+        }
+    });
 
 
     // 2. Using JSON-P
@@ -118,8 +127,8 @@ var loadWikiArticles = function(cityStrEncoded){
 }
 
 
-// XHR Requests to weather API
 // Code to load weather details 
+// Uses XHR Requests to weather API
 var loadWeatherDetails = function(){
 
      // Using the XHR request object with the weather api
@@ -152,6 +161,10 @@ var loadWeatherDetails = function(){
     xhrRequest.onreadystatechange = handleResponse;
     xhrRequest.open('GET', weather_url, true);
     xhrRequest.send();
+    // After sending the request to the server, we do not wait for teh response to come back
+    // We will proceed will the next line of code
+    // Whenever the response comes back from the server, the browser will handle it 
+    // for us by running by running the asynchronous part of teh code, which in this case is handleResponse event handler
 }
 
 
@@ -160,6 +173,7 @@ var handleSuccess = function(responseText){
     // console.log('XHR Response :');
     // console.log(xhrRequest.response);
 
+    // var responseText = response.responseText;
     var json_response = JSON.parse(responseText);
 
     // API gives temperatures in Kelvin
@@ -192,13 +206,109 @@ var handleFailure = function(){
 }
 
 
-var loadEventBriteDetails = function(){
+// Uses fetch api for getting the weather details from the weather API
+var fetchWeatherDetails = function(){
     
-    // Event Brite API key needed
-    var eventBriteApiKey = '';
-    
+    var weatherApiKey = '';
+    var hotelLocationStr = encodeURI('London,England');
+    var weather_url = 'http://api.openweathermap.org/data/2.5/' ;
+    weather_url += 'weather?q=' + hotelLocationStr + '&appid=' + weatherApiKey ;
+
+    fetch(weather_url)
+    .then(function(response){
+
+        if( !response.ok){
+            throw Error(response.statusText);
+        }
+
+        console.log(response);
+        return response.json();
+
+    }).then( function(response){
+        console.log('Response from the previous call');
+        console.log(response);
+        successCallback(response);
+    }).catch( function(response){
+        console.log('Error in Fetch API');
+        console.log(response);
+    });
+}
+
+
+var successCallback = function(response){
+
+    // Commenting out, as this is already handled by response.json()
+    // var json_response = JSON.parse(responseText);
+
+    // API gives temperatures in Kelvin
+    var temp_max = response.main.temp_max;
+    var temp_min = response.main.temp_min;
+
+    // Convert these to celsius
+    var temp_max_c = Math.floor(temp_max - 273.15) ;
+    var temp_min_c = Math.floor(temp_min - 273.15) ;
+
+    var $weather_container = $('.wikipedia-container');
+    $weather_container.append('<div class="weather-report">');
+   
+    $weather_container.append('<p>');
+    $weather_container.append('Minimum Temperature is ' + temp_min_c);
+    $weather_container.append('</p>');
+    $weather_container.append('<p>');
+    $weather_container.append('Maximum Temperature is ' + temp_max_c);
+    $weather_container.append('</p>');
+    $weather_container.append('</div>');
+}
+
+
+
+// JQuery Request
+var loadWeatherDetailsThroughJquery = function(){
+
+    var weatherApiKey = '';
+    var hotelLocationStr = encodeURI('London,England');
+    var weather_url = 'http://api.openweathermap.org/data/2.5/weather' ;
+    weather_url += '?q=' + hotelLocationStr + '&appid=' + weatherApiKey ;
+   
+    // Jquery automatically parses the data in response as a JSON object 
+    // Unlike XHR Request's JSON.parse and Fetch's response.json() no explicit conversion is needed
+    $.get( weather_url)
+    .done(function(response){
+        console.log('AJAX $get');
+        console.log( response);
+        successCallback(response);
+    })
+    .fail( function(err){
+        console.log('Something went wrong!');
+        console.log(err);
+    });
+
 
 }
 
 
+// Uses fetch api for getting the weather details from the weather API
+var loadEventBriteDetails = function(){
+    
+    // Event Brite API key
+    // var eventbrite_key = '';
+    // var eventbrite_url = 'http://api.openweathermap.org/data/2.5/' ;
+
+}
+
+
+// Use JQuery's getJSON() method
+var loadDetailsForZipcode = function(){
+
+  var zipcode = '27606';
+  var url = 'http://ziptasticapi.com/';
+  url += zipcode ;
+
+  $.getJSON( url, function(data){
+    console.log('Data from ziptasticapi');
+    console.log(data);
+  });
+};
+
+// Function Call !
 $('#form-container').submit(loadData);
